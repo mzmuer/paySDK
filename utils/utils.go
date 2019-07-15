@@ -3,7 +3,9 @@ package utils
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"math/rand"
 	"sort"
 	"time"
@@ -11,6 +13,11 @@ import (
 
 var (
 	rander = rand.New(rand.NewSource(time.Now().UnixNano()))
+)
+
+const (
+	SignTypeMD5        = "MD5"
+	SignTypeHMACSHA256 = "HMAC-SHA256"
 )
 
 func RandomString(ln int) string {
@@ -40,8 +47,20 @@ func MD5(plain []byte) []byte {
 	return cipher
 }
 
+func Sha256(plain []byte) []byte {
+	sha256Ctx := sha256.New()
+	sha256Ctx.Write(plain)
+	cipher := sha256Ctx.Sum(nil)
+	return cipher
+}
+
+func Sha256String(plain string) string {
+	cipher := Sha256([]byte(plain))
+	return hex.EncodeToString(cipher)
+}
+
 // xxx--
-func MapSignMD5(dataMap map[string]string, key string) string {
+func GenerateMapSign(dataMap map[string]string, signType string, key string) (string, error) {
 	keys := make([]string, 0, len(dataMap))
 
 	for key := range dataMap {
@@ -64,5 +83,11 @@ func MapSignMD5(dataMap map[string]string, key string) string {
 	}
 	writer.WriteString("key=" + key)
 
-	return MD5String(writer.String())
+	if signType == SignTypeMD5 {
+		return MD5String(writer.String()), nil
+	} else if signType == SignTypeHMACSHA256 {
+		return Sha256String(writer.String()), nil
+	}
+
+	return "", fmt.Errorf("invalid sign_type: %s", signType)
 }

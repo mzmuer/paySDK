@@ -7,20 +7,33 @@ import (
 	"github.com/mzmuer/paysdk/utils"
 )
 
-type Pay struct {
+type pay struct {
 	AppId     string
 	MchId     string
 	Key       string
+	SignType  string
 	tlsConfig *tls.Config
 	isSandBox bool
 }
 
-func NewPay() *Pay {
-	return &Pay{}
+func NewPay(appId, mchId, key, signType string, tlsConfig *tls.Config, isSandBox bool) *pay {
+	if signType == "" {
+		signType = utils.SignTypeMD5
+	}
+
+	return &pay{
+		AppId:     appId,
+		MchId:     mchId,
+		Key:       key,
+		SignType:  signType,
+		tlsConfig: tlsConfig,
+		isSandBox: isSandBox,
+	}
 }
 
+// -------------------------------------------------------------
 // 创建支付订单
-func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
+func (p *pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 	if req["body"] == "" ||
 		req["out_trade_no"] == "" ||
 		req["total_fee"] == "" ||
@@ -38,12 +51,14 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 		uri = UnifiedorderUrlSuffix
 	}
 
-	// 补充字段
-	req["appid"] = p.AppId
-	req["mch_id"] = p.MchId
-	req["sign"] = utils.MapSignMD5(req, p.Key)
+	// 填充字段
+	req, err := p.fillRequestData(req)
+	if err != nil {
+		return nil, err
+	}
 
-	resp, err := utils.PostXML(DomainApi+uri, p.fillRequestData(req))
+	// 发起请求
+	resp, err := utils.PostXML(DomainApi+uri, req)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +76,7 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 }
 
 // 退款请求
-func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
+func (p *pay) Refund(req XmlMap) (XmlMap, error) {
 	if (req["transaction_id"] == "" && req["out_trade_no"] == "") ||
 		req["total_fee"] == "" ||
 		req["refund_fee	"] == "" {
@@ -76,8 +91,14 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 		uri = RefundUrlSuffix
 	}
 
+	// 填充字段
+	req, err := p.fillRequestData(req)
+	if err != nil {
+		return nil, err
+	}
+
 	// 请求退款
-	resp, err := utils.PostXMLOverTLS(uri, p.tlsConfig, p.fillRequestData(req))
+	resp, err := utils.PostXMLOverTLS(uri, p.tlsConfig, req)
 	if err != nil {
 		return nil, err
 	}
@@ -94,14 +115,15 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 	return result, nil
 }
 
-func (p *Pay) SignVerify(m XmlMap) bool {
+func (p *pay) SignVerify(m XmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
-	return utils.MapSignMD5(m, p.Key) != sign
+	sign2, err := utils.GenerateMapSign(m, p.SignType, p.Key)
+	return sign2 == sign, err
 }
 
 // --
-func (p *Pay) verifyResponse(res XmlMap) error {
+func (p *pay) verifyResponse(res XmlMap) error {
 	if res["return_code"] != Success {
 		return fmt.Errorf(res["return_msg"])
 	}
@@ -110,18 +132,30 @@ func (p *Pay) verifyResponse(res XmlMap) error {
 		return fmt.Errorf(res["result_code"] + "_" + res["err_code_des"])
 	}
 
-	if p.SignVerify(res) {
-		return fmt.Errorf("CreateOrder sign not match[#%+v#]", res)
+	match, err := p.SignVerify(res)
+	if err != nil {
+		return err
+	}
+
+	if !match {
+		return fmt.Errorf("sign not match[#%+v#]", res)
 	}
 
 	return nil
 }
 
-func (p *Pay) fillRequestData(m XmlMap) XmlMap {
+func (p *pay) fillRequestData(m XmlMap) (XmlMap, error) {
 	m["appid"] = p.AppId
 	m["mch_id"] = p.MchId
-	m["sign"] = utils.MapSignMD5(m, p.Key)
+	m["sign_type"] = p.SignType
 	m["nonce_str"] = utils.RandomString(24)
 
-	return m
+	sign, err := utils.GenerateMapSign(m, m["sign_type"], p.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	m["sign"] = sign
+
+	return m, nil
 }
