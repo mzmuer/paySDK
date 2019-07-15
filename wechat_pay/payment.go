@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
-	"paysdk/utils"
+	"github.com/mzmuer/paysdk/utils"
 )
 
 type Pay struct {
