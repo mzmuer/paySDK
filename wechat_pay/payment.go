@@ -68,7 +68,7 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 		return nil, err
 	}
 
-	if err = p.verifyResponse(result); err != nil {
+	if err = p.VerifyResponse(result); err != nil {
 		return nil, err
 	}
 
@@ -108,7 +108,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 		return nil, err
 	}
 
-	if err = p.verifyResponse(result); err != nil {
+	if err = p.VerifyResponse(result); err != nil {
 		return nil, err
 	}
 
@@ -123,7 +123,7 @@ func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 }
 
 // --
-func (p *Pay) verifyResponse(res XmlMap) error {
+func (p *Pay) VerifyResponse(res XmlMap) error {
 	if res["return_code"] != Success {
 		return fmt.Errorf(res["return_msg"])
 	}
@@ -144,6 +144,7 @@ func (p *Pay) verifyResponse(res XmlMap) error {
 	return nil
 }
 
+// ==========================================================
 func (p *Pay) fillRequestData(m XmlMap) (XmlMap, error) {
 	m["appid"] = p.AppId
 	m["mch_id"] = p.MchId
