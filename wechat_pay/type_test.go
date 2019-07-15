@@ -2,7 +2,6 @@ package wechat_pay
 
 import (
 	"encoding/xml"
-	"strings"
 	"testing"
 )
 
@@ -23,13 +22,13 @@ func TestXmlMap(t *testing.T) {
    <sign>0CB01533B8C1EF103065174F50BCA001</sign>
 </xml>`
 
-	mm := XmlMap{}
-	err := xml.NewDecoder(strings.NewReader(s)).Decode(&mm)
+	m := XmlMap{}
+	err := xml.Unmarshal([]byte(s), &m)
 	if err != nil {
 		t.Error("Unmarshal: ", err)
 	}
 
-	_, err = xml.Marshal(mm)
+	_, err = xml.Marshal(m)
 	if err != nil {
 		t.Error("Marshal: ", err)
 	}
