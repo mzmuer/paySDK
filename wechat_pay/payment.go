@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/mzmuer/paysdk"
+	"strings"
 )
 
 type Pay struct {
@@ -16,27 +17,29 @@ type Pay struct {
 	isSandBox bool
 }
 
-func NewPay(appId, mchId, key, certFile, certKeyFile string, isSandBox bool) (*Pay, error) {
-	cert, err := tls.LoadX509KeyPair(certFile, certKeyFile)
-	if err != nil {
-		return nil, err
-	}
-
+func NewPay(appId, mchId, key string, isSandBox bool) *Pay {
 	return &Pay{
-		AppId:    appId,
-		MchId:    mchId,
-		Key:      key,
-		SignType: paysdk.SignTypeMD5,
-		tlsConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		},
+		AppId:     appId,
+		MchId:     mchId,
+		Key:       key,
+		SignType:  paysdk.SignTypeMD5,
 		isSandBox: isSandBox,
-	}, nil
+	}
 }
 
 // config
 func (p *Pay) SetSignType(signType string) {
 	p.SignType = signType
+}
+
+func (p *Pay) SetTLS(certFile, certKeyFile string) error {
+	cert, err := tls.LoadX509KeyPair(certFile, certKeyFile)
+	if err != nil {
+		return err
+	}
+
+	p.tlsConfig = &tls.Config{Certificates: []tls.Certificate{cert}}
+	return nil
 }
 
 // -------------------------------------------------------------
@@ -85,6 +88,10 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 
 // 退款请求
 func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
+	if p.tlsConfig == nil {
+		return nil, fmt.Errorf("before using refund must SetTLS")
+	}
+
 	if (req["transaction_id"] == "" && req["out_trade_no"] == "") ||
 		req["total_fee"] == "" ||
 		req["refund_fee	"] == "" {
@@ -127,7 +134,7 @@ func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
 	sign2, err := paysdk.GenerateMapSign(m, p.SignType, p.Key)
-	return sign2 == sign, err
+	return strings.ToLower(sign2) == strings.ToLower(sign), err
 }
 
 // --
