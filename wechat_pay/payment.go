@@ -7,7 +7,7 @@ import (
 	"github.com/mzmuer/paysdk/utils"
 )
 
-type pay struct {
+type Pay struct {
 	AppId     string
 	MchId     string
 	Key       string
@@ -16,12 +16,12 @@ type pay struct {
 	isSandBox bool
 }
 
-func NewPay(appId, mchId, key, signType string, tlsConfig *tls.Config, isSandBox bool) *pay {
+func NewPay(appId, mchId, key, signType string, tlsConfig *tls.Config, isSandBox bool) *Pay {
 	if signType == "" {
 		signType = utils.SignTypeMD5
 	}
 
-	return &pay{
+	return &Pay{
 		AppId:     appId,
 		MchId:     mchId,
 		Key:       key,
@@ -33,7 +33,7 @@ func NewPay(appId, mchId, key, signType string, tlsConfig *tls.Config, isSandBox
 
 // -------------------------------------------------------------
 // 创建支付订单
-func (p *pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
+func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 	if req["body"] == "" ||
 		req["out_trade_no"] == "" ||
 		req["total_fee"] == "" ||
@@ -76,7 +76,7 @@ func (p *pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 }
 
 // 退款请求
-func (p *pay) Refund(req XmlMap) (XmlMap, error) {
+func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 	if (req["transaction_id"] == "" && req["out_trade_no"] == "") ||
 		req["total_fee"] == "" ||
 		req["refund_fee	"] == "" {
@@ -115,7 +115,7 @@ func (p *pay) Refund(req XmlMap) (XmlMap, error) {
 	return result, nil
 }
 
-func (p *pay) SignVerify(m XmlMap) (bool, error) {
+func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
 	sign2, err := utils.GenerateMapSign(m, p.SignType, p.Key)
@@ -123,7 +123,7 @@ func (p *pay) SignVerify(m XmlMap) (bool, error) {
 }
 
 // --
-func (p *pay) verifyResponse(res XmlMap) error {
+func (p *Pay) verifyResponse(res XmlMap) error {
 	if res["return_code"] != Success {
 		return fmt.Errorf(res["return_msg"])
 	}
@@ -144,7 +144,7 @@ func (p *pay) verifyResponse(res XmlMap) error {
 	return nil
 }
 
-func (p *pay) fillRequestData(m XmlMap) (XmlMap, error) {
+func (p *Pay) fillRequestData(m XmlMap) (XmlMap, error) {
 	m["appid"] = p.AppId
 	m["mch_id"] = p.MchId
 	m["sign_type"] = p.SignType
