@@ -1,7 +1,8 @@
 package wechat_pay
 
 const (
-	DomainApi   = "api.mch.weixin.qq.com"
+	// TODO: 动态容灾域名
+	DomainApi   = "https://api.mch.weixin.qq.com"
 	DomainApi2  = "api2.mch.weixin.qq.com"
 	DomainApiHK = "apihk.mch.weixin.qq.com"
 	DomainApiUS = "apius.mch.weixin.qq.com"

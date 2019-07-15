@@ -106,7 +106,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 	}
 
 	// 请求退款
-	resp, err := paysdk.PostXMLOverTLS(uri, p.tlsConfig, req)
+	resp, err := paysdk.PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
 	if err != nil {
 		return nil, err
 	}
