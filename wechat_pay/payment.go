@@ -16,19 +16,27 @@ type Pay struct {
 	isSandBox bool
 }
 
-func NewPay(appId, mchId, key, signType string, tlsConfig *tls.Config, isSandBox bool) *Pay {
-	if signType == "" {
-		signType = paysdk.SignTypeMD5
+func NewPay(appId, mchId, key, certFile, certKeyFile string, isSandBox bool) (*Pay, error) {
+	cert, err := tls.LoadX509KeyPair(certFile, certKeyFile)
+	if err != nil {
+		return nil, err
 	}
 
 	return &Pay{
-		AppId:     appId,
-		MchId:     mchId,
-		Key:       key,
-		SignType:  signType,
-		tlsConfig: tlsConfig,
+		AppId:    appId,
+		MchId:    mchId,
+		Key:      key,
+		SignType: paysdk.SignTypeMD5,
+		tlsConfig: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		},
 		isSandBox: isSandBox,
-	}
+	}, nil
+}
+
+// config
+func (p *Pay) SetSignType(signType string) {
+	p.SignType = signType
 }
 
 // -------------------------------------------------------------
