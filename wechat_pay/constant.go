@@ -6,13 +6,8 @@ const (
 	DomainApiHK = "apihk.mch.weixin.qq.com"
 	DomainApiUS = "apius.mch.weixin.qq.com"
 
-	Fail       = "FAIL"
-	Success    = "SUCCESS"
-	HMACSHA256 = "HMAC-SHA256"
-	MD5        = "MD5"
-
-	FieldSign     = "sign"
-	FieldSignType = "sign_type"
+	Fail    = "FAIL"
+	Success = "SUCCESS"
 
 	MicropayUrlSuffix         = "/pay/micropay"
 	UnifiedorderUrlSuffix     = "/pay/unifiedorder"

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
-	"github.com/mzmuer/paysdk/utils"
+	"github.com/mzmuer/paysdk"
 )
 
 type Pay struct {
@@ -18,7 +18,7 @@ type Pay struct {
 
 func NewPay(appId, mchId, key, signType string, tlsConfig *tls.Config, isSandBox bool) *Pay {
 	if signType == "" {
-		signType = utils.SignTypeMD5
+		signType = paysdk.SignTypeMD5
 	}
 
 	return &Pay{
@@ -58,7 +58,7 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 	}
 
 	// 发起请求
-	resp, err := utils.PostXML(DomainApi+uri, req)
+	resp, err := paysdk.PostXML(DomainApi+uri, req)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 	}
 
 	// 请求退款
-	resp, err := utils.PostXMLOverTLS(uri, p.tlsConfig, req)
+	resp, err := paysdk.PostXMLOverTLS(uri, p.tlsConfig, req)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
-	sign2, err := utils.GenerateMapSign(m, p.SignType, p.Key)
+	sign2, err := paysdk.GenerateMapSign(m, p.SignType, p.Key)
 	return sign2 == sign, err
 }
 
@@ -148,9 +148,9 @@ func (p *Pay) fillRequestData(m XmlMap) (XmlMap, error) {
 	m["appid"] = p.AppId
 	m["mch_id"] = p.MchId
 	m["sign_type"] = p.SignType
-	m["nonce_str"] = utils.RandomString(24)
+	m["nonce_str"] = paysdk.RandomString(24)
 
-	sign, err := utils.GenerateMapSign(m, m["sign_type"], p.Key)
+	sign, err := paysdk.GenerateMapSign(m, m["sign_type"], p.Key)
 	if err != nil {
 		return nil, err
 	}

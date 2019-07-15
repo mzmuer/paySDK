@@ -1,4 +1,4 @@
-package utils
+package paysdk
 
 import (
 	"bytes"

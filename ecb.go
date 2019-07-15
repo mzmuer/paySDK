@@ -1,4 +1,4 @@
-package crypto
+package paysdk
 
 import (
 	"crypto/aes"
