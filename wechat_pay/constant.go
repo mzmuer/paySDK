@@ -21,6 +21,8 @@ const (
 	ReportUrlSuffix           = "/payitil/report"
 	ShorturlUrlSuffix         = "/tools/shorturl"
 	AuthcodetoopenidUrlSuffix = "/tools/authcodetoopenid"
+	TransfersUrlSuffix        = "/mmpaymkttransfers/promotion/transfers" // 企业付款到零钱
+	GettransferinfoUrlSuffix  = "/mmpaymkttransfers/gettransferinfo"     // 查询企业付款
 
 	// sandbox
 	SandboxMicropayUrlSuffix         = "/sandboxnew/pay/micropay"
@@ -34,4 +36,6 @@ const (
 	SandboxReportUrlSuffix           = "/sandboxnew/payitil/report"
 	SandboxShorturlUrlSuffix         = "/sandboxnew/tools/shorturl"
 	SandboxAuthcodetoopenidUrlSuffix = "/sandboxnew/tools/authcodetoopenid"
+	SandboxTransfersUrlSuffix        = "/sandboxnew/mmpaymkttransfers/promotion/transfers"
+	SandboxGettransferinfoUrlSuffix  = "/sandboxnew/mmpaymkttransfers/gettransferinfo"
 )

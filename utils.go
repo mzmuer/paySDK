@@ -2,6 +2,7 @@ package paysdk
 
 import (
 	"bytes"
+	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
@@ -28,11 +29,11 @@ func _md5String(plain string) string {
 	return hex.EncodeToString(cipher)
 }
 
-// sha256 digest in string
-func _sha256String(plain string) string {
-	sha256Ctx := sha256.New()
-	sha256Ctx.Write([]byte(plain))
-	cipher := sha256Ctx.Sum(nil)
+// hmac-sha256 digest in string
+func _hmcSha256String(plain, key string) string {
+	h := hmac.New(sha256.New, []byte(key))
+	h.Write([]byte(plain))
+	cipher := h.Sum(nil)
 	return hex.EncodeToString(cipher)
 }
 
@@ -63,7 +64,7 @@ func GenerateMapSign(m map[string]string, signType string, key string) (string, 
 	if signType == SignTypeMD5 {
 		return _md5String(writer.String()), nil
 	} else if signType == SignTypeHMACSHA256 {
-		return _sha256String(writer.String()), nil
+		return _hmcSha256String(writer.String(), key), nil
 	}
 
 	return "", fmt.Errorf("invalid sign_type: %s", signType)
