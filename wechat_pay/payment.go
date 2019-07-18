@@ -235,14 +235,12 @@ func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 // --
 func (p *Pay) VerifyResponse(res XmlMap, verifySign bool) error {
 	if res["return_code"] != Success {
-		return fmt.Errorf(res["return_msg"])
+		return fmt.Errorf(res["return_code"] + "_" + res["return_msg"])
 	}
 
-	if res["result_code"] != Success {
-		return fmt.Errorf(res["result_code"] + "_" + res["err_code_des"])
-	}
-
-	if verifySign {
+	if res["result_code"] == Fail { // 业务类型错误
+		return nil
+	} else if res["result_code"] == Success && verifySign {
 		match, err := p.SignVerify(res)
 		if err != nil {
 			return err
@@ -251,6 +249,8 @@ func (p *Pay) VerifyResponse(res XmlMap, verifySign bool) error {
 		if !match {
 			return fmt.Errorf("sign not match[#%+v#]", res)
 		}
+	} else { // 未知 result_code
+		return fmt.Errorf(res["result_code"] + "_" + res["err_code_des"])
 	}
 
 	return nil
