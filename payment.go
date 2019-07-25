@@ -129,6 +129,38 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 	return result, nil
 }
 
+// 下载资金对账单
+func (p *Pay) DownloadFundFlow(req XmlMap) ([]byte, error) {
+	if p.tlsConfig == nil {
+		return nil, fmt.Errorf("before using refund must SetTLS")
+	}
+
+	if req["bill_date"] == "" || req["account_type"] == "" {
+		return nil, fmt.Errorf("缺少必传参数")
+	}
+
+	var uri string
+	if p.isSandBox {
+		uri = SandboxDownloadfundflowUrlSuffix
+	} else {
+		uri = DownloadfundflowUrlSuffix
+	}
+
+	// 填充字段
+	req, err := p.fillRequestData(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// 请求下载对账单
+	resp, err := PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 // 付款到用户零钱
 func (p *Pay) PromotionTransfers(req XmlMap) (XmlMap, error) {
 	if p.tlsConfig == nil {
