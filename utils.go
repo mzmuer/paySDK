@@ -1,4 +1,4 @@
-package paysdk
+package wechatpay
 
 import (
 	"bytes"

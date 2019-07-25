@@ -1,4 +1,4 @@
-package paysdk
+package wechatpay
 
 const (
 	// TODO: 动态容灾域名
