@@ -43,7 +43,7 @@ func (p *Pay) SetTLS(certFile, certKeyFile string) error {
 
 // -------------------------------------------------------------
 // 创建支付订单
-func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
+func (p *Pay) UnifiedOrder(req map[string]string) (map[string]string, error) {
 	if req["body"] == "" ||
 		req["out_trade_no"] == "" ||
 		req["total_fee"] == "" ||
@@ -73,7 +73,7 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 		return nil, err
 	}
 
-	result := XmlMap{}
+	result := xmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 }
 
 // 退款请求
-func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
+func (p *Pay) Refund(req map[string]string) (map[string]string, error) {
 	if p.tlsConfig == nil {
 		return nil, fmt.Errorf("before using refund must SetTLS")
 	}
@@ -117,7 +117,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 		return nil, err
 	}
 
-	result := XmlMap{}
+	result := xmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 }
 
 // 下载资金对账单
-func (p *Pay) DownloadFundFlow(req XmlMap) ([]byte, error) {
+func (p *Pay) DownloadFundFlow(req map[string]string) ([]byte, error) {
 	if p.tlsConfig == nil {
 		return nil, fmt.Errorf("before using refund must SetTLS")
 	}
@@ -162,7 +162,7 @@ func (p *Pay) DownloadFundFlow(req XmlMap) ([]byte, error) {
 }
 
 // 付款到用户零钱
-func (p *Pay) PromotionTransfers(req XmlMap) (XmlMap, error) {
+func (p *Pay) PromotionTransfers(req map[string]string) (map[string]string, error) {
 	if p.tlsConfig == nil {
 		return nil, fmt.Errorf("before using refund must SetTLS")
 	}
@@ -201,7 +201,7 @@ func (p *Pay) PromotionTransfers(req XmlMap) (XmlMap, error) {
 		return nil, err
 	}
 
-	result := XmlMap{}
+	result := xmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -214,8 +214,8 @@ func (p *Pay) PromotionTransfers(req XmlMap) (XmlMap, error) {
 }
 
 // 查询企业付款
-func (p *Pay) Gettransferinfo(partnerTradeNo string) (XmlMap, error) {
-	req := XmlMap{"partner_trade_no": partnerTradeNo}
+func (p *Pay) Gettransferinfo(partnerTradeNo string) (map[string]string, error) {
+	req := xmlMap{"partner_trade_no": partnerTradeNo}
 
 	if req["partner_trade_no"] == "" {
 		return nil, fmt.Errorf("缺少必传参数")
@@ -244,7 +244,7 @@ func (p *Pay) Gettransferinfo(partnerTradeNo string) (XmlMap, error) {
 		return nil, err
 	}
 
-	result := XmlMap{}
+	result := xmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -256,7 +256,7 @@ func (p *Pay) Gettransferinfo(partnerTradeNo string) (XmlMap, error) {
 	return result, nil
 }
 
-func (p *Pay) SignVerify(m XmlMap) (bool, error) {
+func (p *Pay) SignVerify(m xmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
 	sign2, err := GenerateMapSign(m, p.SignType, p.Key)
@@ -264,7 +264,7 @@ func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 }
 
 // --
-func (p *Pay) VerifyResponse(res XmlMap, verifySign bool) error {
+func (p *Pay) VerifyResponse(res xmlMap, verifySign bool) error {
 	if res["return_code"] != Success {
 		return fmt.Errorf(res["return_code"] + "_" + res["return_msg"])
 	}
@@ -289,7 +289,7 @@ func (p *Pay) VerifyResponse(res XmlMap, verifySign bool) error {
 	return nil
 }
 
-func (p *Pay) fillRequestData(m XmlMap) (XmlMap, error) {
+func (p *Pay) fillRequestData(m map[string]string) (map[string]string, error) {
 	m["appid"] = p.AppId
 	m["mch_id"] = p.MchId
 	m["sign_type"] = p.SignType

@@ -5,15 +5,15 @@ import (
 	"io"
 )
 
-type XmlMap map[string]string
+type xmlMap map[string]string
 
 type xmlEntry struct {
 	XMLName xml.Name
 	Value   string `xml:",chardata"`
 }
 
-func (m *XmlMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	*m = XmlMap{}
+func (m *xmlMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	*m = xmlMap{}
 	for {
 		var e xmlEntry
 
@@ -29,7 +29,7 @@ func (m *XmlMap) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
-func (m XmlMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (m xmlMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if len(m) == 0 {
 		return nil
 	}

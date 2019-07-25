@@ -22,7 +22,7 @@ func TestXmlMap(t *testing.T) {
    <sign>0CB01533B8C1EF103065174F50BCA001</sign>
 </xml>`
 
-	m := XmlMap{}
+	m := map[string]string{}
 	err := xml.Unmarshal([]byte(s), &m)
 	if err != nil {
 		t.Error("Unmarshal: ", err)
