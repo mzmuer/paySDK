@@ -19,6 +19,9 @@ var (
 const (
 	SignTypeMD5        = "MD5"
 	SignTypeHMACSHA256 = "HMAC-SHA256"
+
+	SignTypeRSA  = "RSA"
+	SignTypeRSA2 = "RSA2"
 )
 
 // md5 digest in string

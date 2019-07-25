@@ -1,10 +1,9 @@
-package wechat_pay
+package paysdk
 
 import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
-	"github.com/mzmuer/paysdk"
 	"strings"
 )
 
@@ -22,7 +21,7 @@ func NewPay(appId, mchId, key string, isSandBox bool) *Pay {
 		AppId:     appId,
 		MchId:     mchId,
 		Key:       key,
-		SignType:  paysdk.SignTypeMD5,
+		SignType:  SignTypeMD5,
 		isSandBox: isSandBox,
 	}
 }
@@ -69,7 +68,7 @@ func (p *Pay) UnifiedOrder(req XmlMap) (XmlMap, error) {
 	}
 
 	// 发起请求
-	resp, err := paysdk.PostXML(DomainApi+uri, req)
+	resp, err := PostXML(DomainApi+uri, req)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +112,7 @@ func (p *Pay) Refund(req XmlMap) (XmlMap, error) {
 	}
 
 	// 请求退款
-	resp, err := paysdk.PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
+	resp, err := PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
 	if err != nil {
 		return nil, err
 	}
@@ -157,15 +156,15 @@ func (p *Pay) PromotionTransfers(req XmlMap) (XmlMap, error) {
 	// 填充字段
 	req["mch_appid"] = p.AppId
 	req["mchid"] = p.MchId
-	req["nonce_str"] = paysdk.RandomString(24)
-	sign, err := paysdk.GenerateMapSign(req, paysdk.SignTypeMD5, p.Key)
+	req["nonce_str"] = RandomString(24)
+	sign, err := GenerateMapSign(req, SignTypeMD5, p.Key)
 	if err != nil {
 		return nil, err
 	}
 	req["sign"] = strings.ToUpper(sign)
 
 	// 发起请求
-	resp, err := paysdk.PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
+	resp, err := PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
 	if err != nil {
 		return nil, err
 	}
@@ -200,15 +199,15 @@ func (p *Pay) Gettransferinfo(partnerTradeNo string) (XmlMap, error) {
 	// 填充字段
 	req["appid"] = p.AppId
 	req["mch_id"] = p.MchId
-	req["nonce_str"] = paysdk.RandomString(24)
-	sign, err := paysdk.GenerateMapSign(req, p.SignType, p.Key)
+	req["nonce_str"] = RandomString(24)
+	sign, err := GenerateMapSign(req, p.SignType, p.Key)
 	if err != nil {
 		return nil, err
 	}
 	req["sign"] = strings.ToUpper(sign)
 
 	// 发起请求
-	resp, err := paysdk.PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
+	resp, err := PostXMLOverTLS(DomainApi+uri, p.tlsConfig, req)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +227,7 @@ func (p *Pay) Gettransferinfo(partnerTradeNo string) (XmlMap, error) {
 func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
-	sign2, err := paysdk.GenerateMapSign(m, p.SignType, p.Key)
+	sign2, err := GenerateMapSign(m, p.SignType, p.Key)
 	return strings.ToUpper(sign2) == strings.ToUpper(sign), err
 }
 
@@ -258,22 +257,13 @@ func (p *Pay) VerifyResponse(res XmlMap, verifySign bool) error {
 	return nil
 }
 
-// ==========================================================
-// version = 空
-// appid
-// mch_id
-//
-// version = mmpaymkttransfers
-// mch_appid
-// mchid
-
 func (p *Pay) fillRequestData(m XmlMap) (XmlMap, error) {
 	m["appid"] = p.AppId
 	m["mch_id"] = p.MchId
 	m["sign_type"] = p.SignType
-	m["nonce_str"] = paysdk.RandomString(24)
+	m["nonce_str"] = RandomString(24)
 
-	sign, err := paysdk.GenerateMapSign(m, p.SignType, p.Key)
+	sign, err := GenerateMapSign(m, p.SignType, p.Key)
 	if err != nil {
 		return nil, err
 	}

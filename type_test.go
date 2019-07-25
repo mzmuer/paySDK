@@ -1,4 +1,4 @@
-package wechat_pay
+package paysdk
 
 import (
 	"encoding/xml"
