@@ -73,7 +73,7 @@ func (p *Pay) UnifiedOrder(req map[string]string) (map[string]string, error) {
 		return nil, err
 	}
 
-	result := xmlMap{}
+	result := XmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (p *Pay) Refund(req map[string]string) (map[string]string, error) {
 		return nil, err
 	}
 
-	result := xmlMap{}
+	result := XmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (p *Pay) PromotionTransfers(req map[string]string) (map[string]string, erro
 		return nil, err
 	}
 
-	result := xmlMap{}
+	result := XmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func (p *Pay) PromotionTransfers(req map[string]string) (map[string]string, erro
 
 // 查询企业付款
 func (p *Pay) Gettransferinfo(partnerTradeNo string) (map[string]string, error) {
-	req := xmlMap{"partner_trade_no": partnerTradeNo}
+	req := XmlMap{"partner_trade_no": partnerTradeNo}
 
 	if req["partner_trade_no"] == "" {
 		return nil, fmt.Errorf("缺少必传参数")
@@ -244,7 +244,7 @@ func (p *Pay) Gettransferinfo(partnerTradeNo string) (map[string]string, error) 
 		return nil, err
 	}
 
-	result := xmlMap{}
+	result := XmlMap{}
 	if err = xml.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
@@ -256,7 +256,7 @@ func (p *Pay) Gettransferinfo(partnerTradeNo string) (map[string]string, error) 
 	return result, nil
 }
 
-func (p *Pay) SignVerify(m xmlMap) (bool, error) {
+func (p *Pay) SignVerify(m XmlMap) (bool, error) {
 	sign := m["sign"]
 	delete(m, "sign")
 	sign2, err := GenerateMapSign(m, p.SignType, p.Key)
@@ -264,7 +264,7 @@ func (p *Pay) SignVerify(m xmlMap) (bool, error) {
 }
 
 // --
-func (p *Pay) VerifyResponse(res xmlMap, verifySign bool) error {
+func (p *Pay) VerifyResponse(res XmlMap, verifySign bool) error {
 	if res["return_code"] != Success {
 		return fmt.Errorf(res["return_code"] + "_" + res["return_msg"])
 	}

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func PostXML(url string, req xmlMap) ([]byte, error) {
+func PostXML(url string, req XmlMap) ([]byte, error) {
 	reqBody, err := xml.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func PostXML(url string, req xmlMap) ([]byte, error) {
 	return ioutil.ReadAll(response.Body)
 }
 
-func PostXMLOverTLS(url string, tlsConfig *tls.Config, req xmlMap) ([]byte, error) {
+func PostXMLOverTLS(url string, tlsConfig *tls.Config, req XmlMap) ([]byte, error) {
 	reqBuffer, err := xml.Marshal(req)
 	if err != nil {
 		return nil, err
