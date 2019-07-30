@@ -93,7 +93,7 @@ func (p *Pay) Refund(req map[string]string) (map[string]string, error) {
 
 	if (req["transaction_id"] == "" && req["out_trade_no"] == "") ||
 		req["total_fee"] == "" ||
-		req["refund_fee	"] == "" {
+		req["refund_fee"] == "" {
 
 		return nil, fmt.Errorf("缺少必传参数")
 	}
